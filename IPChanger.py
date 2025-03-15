@@ -1,41 +1,51 @@
-# pip install termcolor pyfiglet indirin
-
+import requests
 import random
 import time
-import pyfiglet
-import os
 from termcolor import colored
+import pyfiglet
 
-# Rastgele IP adresi oluşturma fonksiyonu
-def generate_random_ip():
-    return '.'.join(str(random.randint(0, 255)) for _ in range(4))
+# IP değiştirmek için kullanılacak proxy listesi
+proxy_list = [
+    "http://123.456.789.101:8080",
+    "http://234.567.890.123:8080",
+    "http://345.678.901.234:8080",
+    "http://456.789.012.345:8080",
+    "http://567.890.123.456:8080",
+    # Buraya daha fazla proxy ekleyebilirsiniz (1000'e kadar).
+]
 
-# 1000 tane rastgele IP oluşturma fonksiyonu
-def generate_ip_list():
-    return [generate_random_ip() for _ in range(1000)]
+# Yazıyı renkli olarak göstermek için pyfiglet kullanıyoruz
+ascii_banner = pyfiglet.figlet_format("IPChanger by Y46")
+print(colored(ascii_banner, "red"))
+print(colored("Press Enter to Start", "yellow"))
 
-# Görsel ASCII sanatı oluşturma fonksiyonu
-def print_ascii_art():
-    ascii_art = pyfiglet.figlet_format("IPChanger by Y46")
-    print(colored(ascii_art, 'red'))  # Başlık kırmızı renkte olacak
-    print(colored("Press Enter to start...", 'blue'))  # Mavi renkte olacak
+input()
 
-# IP'yi değiştiren ve 0.1 saniye bekleyen fonksiyon
-def change_ip():
-    ip_list = generate_ip_list()  # Her 1000 IP'lik küme için yeni liste oluştur
-    while True:
-        for ip in ip_list:
-            os.system('cls' if os.name == 'nt' else 'clear')  # Ekranı temizle
-            print(colored("IPChanger by Y46", 'red'))
-            print(colored("Değişen IP:", 'cyan'), colored(ip, 'green'))
-            time.sleep(0.1)  # 0.1 saniye bekle
+# 1000 defa IP değiştirme
+for i in range(1000):
+    # Random olarak bir proxy seçiyoruz
+    proxy = random.choice(proxy_list)
+    print(colored(f"Using Proxy: {proxy}", "green"))
+    
+    # Proxy ayarları
+    proxies = {
+        "http": proxy,
+        "https": proxy,
+    }
+    
+    try:
+        # İstek göndererek IP değiştirme (örneğin bir web sitesine bağlanma)
+        response = requests.get("http://httpbin.org/ip", proxies=proxies, timeout=5)
+        if response.status_code == 200:
+            ip_info = response.json()
+            ip_address = ip_info.get('origin')
+            print(colored(f"New IP: {ip_address}", "yellow"))
+        else:
+            print(colored("Failed to connect using the proxy!", "red"))
+    except requests.exceptions.RequestException as e:
+        print(colored(f"Error: {e}", "red"))
+    
+    # 1 saniye bekle
+    time.sleep(1)
 
-# Başlangıç ekranı ve kullanıcıdan Enter tuşuna basılmasını istemek
-def main():
-    print_ascii_art()
-    input("Press Enter to start...")
-    change_ip()
-
-# Ana fonksiyonu çalıştır
-if __name__ == "__main__":
-    main()
+print(colored("Completed 1000 IP changes!", "blue"))
